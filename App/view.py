@@ -82,7 +82,12 @@ def print_req_1(control):
         Función que imprime la solución del Requerimiento 1 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 1
-    pass
+    print("="*10+" Req No. 1 Inputs " + "="*10 )
+ 
+    anio_inicial = input('Ingrese la fecha inicial del intervalo o (en formato "%Y-%m-%dT%H:%M")\n->')
+    anio_final = int(input('Ingrese la fecha final del intervalo o (en formato "%Y-%m-%dT%H:%M")\n->'))
+
+
 
 
 def print_req_2(control):
@@ -90,7 +95,10 @@ def print_req_2(control):
         Función que imprime la solución del Requerimiento 2 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 2
-    pass
+    print("="*10+" Req No. 2 Inputs " + "="*10 )
+
+    magnitudmin = int(input('Ingrese el límite inferior de la magnitud (float) \n->'))
+    magnitudmax = input('Ingrese el límite superior de la magnitud (float) \n->')
 
 
 def print_req_3(control):
@@ -98,7 +106,11 @@ def print_req_3(control):
         Función que imprime la solución del Requerimiento 3 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 3
-    pass
+    print("="*10+" Requerimiento No. 3 Inputs-> José Gabriel Bernal Cárdenas jg.bernalc1@uniandes.edu.co, 202213421" + "="*10 )
+    magnitudmin = input('Digite el mínimo de magnitud para revisar entre los eventos\n->')
+    profundidadmax = input('Digite el máximo de magnitud para revisar entre los eventos \n->')
+
+    
 
 
 def print_req_4(control):
@@ -106,15 +118,21 @@ def print_req_4(control):
         Función que imprime la solución del Requerimiento 4 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 4
-    pass
+    print("="*10+" Requerimiento No. 4 Inputs-> Juan Camilo Gómez Uribe j.gomezu@uniandes.edu.co, 202220238" + "="*10 )
+    significanciamin = input('Digite el mínimo de significancia (sig) para revisar entre los eventos\n->')
+    azitumalmax = input('Digite la máxima distancia azimutal (gap) para revisar entre los eventos \n->')
 
+    
 
 def print_req_5(control):
     """
         Función que imprime la solución del Requerimiento 5 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 5
-    pass
+    print("="*10+" Requerimiento No. 5 Inputs-> Frank Yasser Ramírez Marín fy.ramirez@uniandes.edu.co, 202215747 " + "="*10 )
+    profundidadmin = input('Digite el mínimo de profundidad (depth) para revisar entre los eventos\n->')
+    minestaciones = input('Digite la cantidad mínima de esttaciones que detectan el evento (nst) para revisar entre los eventos \n->')
+
 
 
 def print_req_6(control):
@@ -122,7 +140,13 @@ def print_req_6(control):
         Función que imprime la solución del Requerimiento 6 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 6
-    pass
+    print("="*10+" Req No. 6 Inputs " + "="*10 )
+    aniorelevante = input('Digite el año relevante (en formato “%Y”) \n->')
+    latreferencia = input('Digite la latitud de referencia para el área de eventos (lat) \n->')
+    longreferencia = input('Digite la longitud de referencia para el área de eventos (long) \n->')
+    radioarea = input('Digite el radio (km) del área circundante (float) \n->')
+    neventos = input('Digite el número de N eventos de mágnitud más cercana a revisar \n->')
+
 
 
 def print_req_7(control):
@@ -130,7 +154,13 @@ def print_req_7(control):
         Función que imprime la solución del Requerimiento 7 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 7
-    pass
+    print("="*10+" Req No. 7 Inputs " + "="*10 )
+    aniorelevante = input('Digite el año relevante (en formato “%Y”) \n->')
+    regionasociada = input('Digite el título de la región asociada (title) \n->')
+    propiedad = input('Digite la propiedad de conteo (magnitud, profundidad o significancia)  \n->')
+    radioarea = input('Digite el radio (km) del área circundante (float) \n->')
+    casillas = input('Digite el número de segmentos o casillas (bins) en los que se divide el histograma \n->')
+
 
 
 def print_req_8(control):
