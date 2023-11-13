@@ -20,12 +20,18 @@
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
 
-import config as cf
-import model
-import time
-import csv
-import tracemalloc
 
+import config as cf
+import csv
+import time
+import model
+import tracemalloc
+from DISClib.ADT import map as mp
+from DISClib.DataStructures import mapentry as me
+from DISClib.ADT import list as lt
+assert cf
+import csv
+csv.field_size_limit(2147483647)
 """
 El controlador se encarga de mediar entre la vista y el modelo.
 """
@@ -36,20 +42,45 @@ def new_controller():
     Crea una instancia del modelo
     """
     #TODO: Llamar la función del modelo que crea las estructuras de datos
-    pass
+    control = model.new_data_structs()
+    return control
 
+def filee(file_name):
+    fileee = csv.DictReader(open(file_name, encoding='utf-8'))
+    return fileee
 
 # Funciones para la carga de datos
 
-def load_data(control, filename):
+
+# Funciones de ordenamiento
+def load_data(control, filename, memoriasino):
     """
     Carga los datos del reto
     """
-    # TODO: Realizar la carga de datos
-    pass
+
+    if memoriasino == 1:
+        tiempoinicial = get_time()
+        tracemalloc.start()
+        memoriainicial = get_memory()
+        fileinput = filee(filename)
+        for terremoto in fileinput:
+            model.add_data(control, terremoto)
+        memoriafinal = get_memory()
+        tracemalloc.stop()
+        tiempofinal = get_time()
+        tiempofinal = delta_time(tiempoinicial, tiempofinal)
+        memoria_usada = delta_memory(memoriafinal, memoriainicial)
+        return control, tiempofinal, memoria_usada
+    else:
+        tiempoinicial = get_time()
+        input_file = filee(filename)
+        for terremoto in input_file:
+            model.add_data(control, terremoto)
+        tiempofin = get_time()
+        tiempofinal = delta_time(tiempoinicial, tiempofin)
+        return control, tiempofinal, None
 
 
-# Funciones de ordenamiento
 
 def sort(control):
     """

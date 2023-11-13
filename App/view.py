@@ -31,6 +31,9 @@ from DISClib.DataStructures import mapentry as me
 assert cf
 from tabulate import tabulate
 import traceback
+import sys
+default_limit = 1000
+sys.setrecursionlimit(default_limit*10)
 
 """
 La vista se encarga de la interacción con el usuario
@@ -62,20 +65,51 @@ def print_menu():
     print("0- Salir")
 
 
-def load_data(control):
+def load_data(control, filename, memoriasino):
     """
     Carga los datos
     """
-    #TODO: Realizar la carga de datos
-    pass
+    
+    datos = controller.load_data(control, filename, memoriasino)
+    return datos
+def tresprimerosultimos(lista ,sample=3):
 
+    cosas = lt.size(lista)
+    
+    listaprintear = lt.newList(datastructure="ARRAY_LIST")
+    
+    if cosas <= sample*2:
+        for terremoto in lt.iterator(lista):
+            lt.addLast(listaprintear, terremoto)
+    else:
+        i = 1
+        while i <= sample:
+            terremoto = lt.getElement(lista, i)
+            lt.addLast(listaprintear, terremoto)
+            i += 1
+            
+        i = cosas - sample + 1
+        while i <= cosas:
+            terremoto = lt.getElement(lista, i)
+            lt.addLast(listaprintear, terremoto)
+            i += 1
+
+    return listaprintear
 
 def print_data(control, id):
     """
         Función que imprime un dato dado su ID
     """
     #TODO: Realizar la función para imprimir un elemento
-    pass
+    lista_terremotos = control["terremotos"]
+    listaprintear = tresprimerosultimos(lista_terremotos)
+    listamanipulable = lt.newList(datastructure= "ARRAY_LIST")
+    
+    printlist_manipulable = lt.iterator(printlist_manipulable)
+    print("3 primeras y últimos terremotos cargados")
+    print(tabulate(printlist_manipulable, headers="keys", tablefmt="simple_grid", maxcolwidths=15, maxheadercolwidths=15))
+
+
 
 def print_req_1(control):
     """
@@ -85,7 +119,7 @@ def print_req_1(control):
     print("="*10+" Req No. 1 Inputs " + "="*10 )
  
     anio_inicial = input('Ingrese la fecha inicial del intervalo o (en formato "%Y-%m-%dT%H:%M")\n->')
-    anio_final = int(input('Ingrese la fecha final del intervalo o (en formato "%Y-%m-%dT%H:%M")\n->'))
+    anio_final = (input('Ingrese la fecha final del intervalo o (en formato "%Y-%m-%dT%H:%M")\n->'))
 
 
 
@@ -183,10 +217,68 @@ if __name__ == "__main__":
     #ciclo del menu
     while working:
         print_menu()
-        inputs = input('Seleccione una opción para continuar\n')
+        inputs = input('Seleccione una opción por favor \n')
         if int(inputs) == 1:
-            print("Cargando información de los archivos ....\n")
-            data = load_data(control)
+            print("Cargando información de los archivos....\n")
+            control = new_controller()
+                
+            print("Quiere que se calcule la memoria que se use? \n-> ")
+            memoriasino = float(input("Sí\n->1 \n No\n->0 \n-> "))
+                
+            print("¿Que tamaño de archivo desea cargar? \n")
+            print("1. 5% de los datos")
+            print("2. 10% de los datos")
+            print("3. 20% de los datos")
+            print("4. 30% de los datos")
+            print("5. 50% de los datos")
+            print("6. 80% de los datos")
+            print("7. archivo Large (todos los datos)")
+            print("8. archivo Small (el más pequeño) \n")
+                
+            file_name = int(input("\n-> "))
+            
+            if file_name == 1:
+                
+                
+                    print("Cargando el 5% de los datos...")
+                    
+                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-5pct.csv', memoriasino)
+                    
+            elif file_name == 2:
+                    print("Cargando el 10%  de los datos...")
+                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-10pct.csv', memoriasino)
+                    
+            elif file_name == 3:
+                    print("Cargando el 20%  de los datos...")
+                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-20pct.csv', memoriasino)
+                    
+            elif file_name == 4:
+                    print("Cargando el 30%  de los datos...")
+                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-30pct.csv', memoriasino)
+
+            elif file_name == 5:
+                    print("Cargando el 50%  de los datos ...")
+                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-50pct.csv', memoriasino)
+                    
+            elif file_name == 6:
+                    print("Cargando el 80%  de los datos...")
+                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-80pct.csv', memoriasino)
+
+            elif file_name == 7:
+                    print("Cargando datos del archivo large...")
+                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-large.csv', memoriasino)
+                    
+            elif file_name == 8:
+                    print("Cargando datos del archivo small ...")
+                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-small.csv', memoriasino)
+                    
+            print_data(resultado)
+                    
+            if int(memoriasino) == 1:
+                print("La memoria que se uso en esta carga de datos fue de \n-> ", str(memoriaa), "Kb")
+                
+                print("El tiempo que tardó esta ejecución fue: ", str(tiempo), "milisegundos") 
+                      
         elif int(inputs) == 2:
             print_req_1(control)
 

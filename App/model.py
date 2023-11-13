@@ -40,7 +40,7 @@ from DISClib.Algorithms.Sorting import selectionsort as se
 from DISClib.Algorithms.Sorting import mergesort as merg
 from DISClib.Algorithms.Sorting import quicksort as quk
 assert cf
-
+import datetime as dt
 """
 Se define la estructura de un catálogo de videos. El catálogo tendrá
 dos listas, una para los videos, otra para las categorias de los mismos.
@@ -54,22 +54,73 @@ def new_data_structs():
     Inicializa las estructuras de datos del modelo. Las crea de
     manera vacía para posteriormente almacenar la información.
     """
-    #TODO: Inicializar las estructuras de datos
-    pass
+    data_structs = {"informacion": mp.newMap(1),
+                    "tiempo": om.newMap(),
+                    "año_mes": om.newMap(),
+                    "magnitud": om.newMap(),
+                    "profundidad":om.newMap()}
+    return data_structs
 
 
 # Funciones para agregar informacion al modelo
 
+def cargainfo(catalog:dict, filas:list, columnas:list, keys:list, actual: int):
+    
+    temblor = {} 
+    for i in range(len(columnas)):
+        temblor[keys[i]] = filas[columnas[i]]
+    
+    momento= dt.datetime.strptime('%Y-%m-%dT%H:%M',temblor['time'])
+    temblor['time'] = momento
+    
+    mp.put(catalog['informacion'], actual, temblor)
+    
 def add_data(data_structs, data):
     """
     Función para agregar nuevos elementos a la lista
     """
     #TODO: Crear la función para agregar elementos a una lista
-    pass
+    lt.addLast(data_structs['temblores'], data)
+    fechas(data_structs['Fechas'], data)
+    
 
 
+def fechas(map, data):
+    fecha = data['time']
+    fechacorta = fecha[:19]
+    fechareal = fechacorta.replace("/", "-", 2)
+    fechatemblor = dt.datetime.strptime(fechareal, '%Y-%m-%d %H:%M:%S')
+    entrada = om.get(map, fechatemblor.date())
+    if entrada is None:
+        entradaa = nuevafecha(data)
+        om.put(map, fechatemblor.date(), entradaa)
+    else:
+        entradaa = me.getValue(entrada)
+    fechaa(entradaa, data)
+    return map
 # Funciones para creacion de datos
+def nuevafecha(data):
+    """
+    Crea una entrada en el indice por fechas, es decir en el arbol
+    binario.
+    """
+    entradaa = lt.newList('SINGLE_LINKED', comparacionfechas)
+    return entradaa
 
+def comparacionfechas(fecha1, fecha2):
+    """
+    Compara dos fechas
+    """
+    if (fecha1 == fecha2):
+        return 0
+    elif (fecha1 < fecha2):
+        return 1
+    else:
+        return -1
+def fechaa(datentry, data):
+    lst = datentry
+    lt.addLast(lst, data)
+    
 def new_data(id, info):
     """
     Crea una nueva estructura para modelar los datos
@@ -96,12 +147,28 @@ def data_size(data_structs):
     pass
 
 
-def req_1(data_structs):
+def req_1(data_structs, anio_inicial,anio_final):
     """
     Función que soluciona el requerimiento 1
     """
     # TODO: Realizar el requerimiento 1
-    pass
+    anio_inicial = dt.datetime.strptime(anio_inicial, '%Y-%m-%dT%H:%M')
+    anio_final = dt.datetime.strptime(anio_final, '%Y-%m-%dT%H:%M')
+    arbol= data_structs["tiempo"]
+    rango= om.values(arbol, anio_inicial, anio_final)
+    informacion=data_structs["Info"]
+    lista= lt.newList("SINGLE_LINKED")
+    
+    
+    for bucket in lt.iterator(rango):
+        
+        
+        for valor in lt.iterator(bucket):
+            
+            lt.addFirst(lista, me.getValue(mp.get(informacion, valor)))
+            
+            
+    return lista
 
 
 def req_2(data_structs):
