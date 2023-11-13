@@ -152,23 +152,25 @@ def req_1(data_structs, anio_inicial,anio_final):
     Función que soluciona el requerimiento 1
     """
     # TODO: Realizar el requerimiento 1
-    anio_inicial = dt.datetime.strptime(anio_inicial, '%Y-%m-%dT%H:%M')
-    anio_final = dt.datetime.strptime(anio_final, '%Y-%m-%dT%H:%M')
-    arbol= data_structs["tiempo"]
-    rango= om.values(arbol, anio_inicial, anio_final)
-    informacion=data_structs["Info"]
-    lista= lt.newList("SINGLE_LINKED")
+    fechain = dt.datetime.strptime(anio_inicial, '%Y/%m/%d')
     
+    fechafi = dt.datetime.strptime(anio_final, '%Y/%m/%d')
+    lst = om.values(data_structs['Fechas'], fechafi.date(), fechain.date())
     
-    for bucket in lt.iterator(rango):
+    terremotos = 0
+    
+    listaterremotos = lt.newList(datastructure="ARRAY_LIST")
+    
+    for fechas in lt.iterator(lst):
+        #print(fechas)
         
+        terremotos += lt.size(fechas)
         
-        for valor in lt.iterator(bucket):
-            
-            lt.addFirst(lista, me.getValue(mp.get(informacion, valor)))
-            
-            
-    return lista
+        for temblor in lt.iterator(fechas):
+            #print(temblor)
+            lt.addLast(listaterremotos, temblor)
+            #print(listaterremotos)
+    return terremotos, listaterremotos
 
 
 def req_2(data_structs):
