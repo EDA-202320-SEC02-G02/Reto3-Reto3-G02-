@@ -173,12 +173,27 @@ def req_1(data_structs, anio_inicial,anio_final):
     return terremotos, listaterremotos
 
 
-def req_2(data_structs):
+def req_2(data_structs, magnitudmin,magnitudmax):
     """
     Función que soluciona el requerimiento 2
     """
     # TODO: Realizar el requerimiento 2
-    pass
+    lst = om.values(data_structs['magnitud'], magnitudmin,magnitudmax)
+    
+    terremotos = 0
+    
+    listaterremotos = lt.newList(datastructure="ARRAY_LIST")
+    
+    for fechas in lt.iterator(lst):
+        #print(fechas)
+        
+        terremotos += lt.size(fechas)
+        
+        for temblor in lt.iterator(fechas):
+            #print(temblor)
+            lt.addLast(listaterremotos, temblor)
+            #print(listaterremotos)
+    return terremotos, listaterremotos
 
 
 def req_3(data_structs):
