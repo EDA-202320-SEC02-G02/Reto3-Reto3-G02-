@@ -236,6 +236,13 @@ def datosfiltrados(data, atributos):
         
     return datosfiltrados
 
+def sort(data_structs,criterio):
+    """
+    Función encargada de ordenar la lista con los datos
+    """
+    
+    return merg.sort(data_structs,criterio)
+
 
 def req_1(data_structs, anio_inicial,anio_final):
     """
@@ -570,23 +577,5 @@ def compare(data_1, data_2):
 # Funciones de ordenamiento
 
 
-def sort_criteria(data_1, data_2):
-    """sortCriteria criterio de ordenamiento para las funciones de ordenamiento
-
-    Args:
-        data1 (_type_): _description_
-        data2 (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    #TODO: Crear función comparadora para ordenar
-    pass
 
 
-def sort(data_structs):
-    """
-    Función encargada de ordenar la lista con los datos
-    """
-    #TODO: Crear función de ordenamiento
-    pass
