@@ -42,43 +42,23 @@ def new_controller():
     Crea una instancia del modelo
     """
     #TODO: Llamar la función del modelo que crea las estructuras de datos
-    control = model.new_data_structs()
-    return control
-
-def filee(file_name):
-    fileee = csv.DictReader(open(file_name, encoding='utf-8'))
-    return fileee
-
-# Funciones para la carga de datos
+    return {'model': model.newCatalog()}
 
 
 # Funciones de ordenamiento
-def load_data(control, filename, memoriasino):
+def load_data(control , filename):
     """
     Carga los datos del reto
     """
+    catalog = control['model']
+    eathquaks= cf.data_dir + 'earthquakes/temblores-utf8-' + filename + '.csv'
+    input_file =csv.DictReader(open(eathquaks, encoding="utf-8"),delimiter=",")
 
-    if memoriasino == 1:
-        tiempoinicial = get_time()
-        tracemalloc.start()
-        memoriainicial = get_memory()
-        fileinput = filee(filename)
-        for terremoto in fileinput:
-            model.add_data(control, terremoto)
-        memoriafinal = get_memory()
-        tracemalloc.stop()
-        tiempofinal = get_time()
-        tiempofinal = delta_time(tiempoinicial, tiempofinal)
-        memoria_usada = delta_memory(memoriafinal, memoriainicial)
-        return control, tiempofinal, memoria_usada
-    else:
-        tiempoinicial = get_time()
-        input_file = filee(filename)
-        for terremoto in input_file:
-            model.add_data(control, terremoto)
-        tiempofin = get_time()
-        tiempofinal = delta_time(tiempoinicial, tiempofin)
-        return control, tiempofinal, None
+    for terremoto in input_file:
+        model.add_earthquake(catalog, terremoto)
+
+    return model.primeroultimo(catalog['earthquackes'], filter_data=['time','lat','long','depth','mag','sig','nst','gap','title','felt','cdi','mmi','tsunami'], size=5)
+
 
 
 
@@ -100,51 +80,72 @@ def get_data(control, id):
     pass
 
 
-def req_1(control):
+def req_1(control,anioincial, aniofinal):
     """
     Retorna el resultado del requerimiento 1
     """
-    # TODO: Modificar el requerimiento 1
-    pass
+    
+    
+    total, eventos, keyeventss = model.req_1(control['model'], anioincial, aniofinal)
+    eventos= model.primeroultimomapa(eventos,keyeventss, filter_data=['time','mag','lat','long','depth','sig','gap','nst','title','cdi','mmi','magType','type','code',])
+    return total, eventos
 
 
-def req_2(control):
+def req_2(control, magnitudmin,magnitudmax):
     """
     Retorna el resultado del requerimiento 2
     """
-    # TODO: Modificar el requerimiento 2
-    pass
+    eventos, valores =model.req_2(control['model'],magnitudmin, magnitudmax)
+
+    return model.primeroultimomapa(eventos, valores, filter_data=['time','mag','lat','long','depth','sig','gap','nst','title','cdi','mmi','magType','type','code'])
 
 
-def req_3(control):
+
+def req_3(control, magnitudmin,profundidadmax):
     """
     Retorna el resultado del requerimiento 3
     """
     # TODO: Modificar el requerimiento 3
-    pass
+    total, eventos, keyeventss=model.req_3(control['model'], magnitudmin, profundidadmax)
+    
+    eventos= model.primeroultimomapa(eventos, keyeventss, filter_data=['time','mag','lat','long','depth','sig','gap','nst','title','cdi','mmi','magType','type','code',])
+    
+    return total, eventos
 
 
-def req_4(control):
+
+def req_4(control,significanciamin,azitumalmax):
     """
     Retorna el resultado del requerimiento 4
     """
-    # TODO: Modificar el requerimiento 4
-    pass
+    
+    total, eventos, keyeventss= model.req_4(control['model'], significanciamin, azitumalmax)
+    
+    eventos= model.primeroultimomapa(eventos, keyeventss, filter_data=['time','mag','lat','long','depth','sig','gap','nst','title','cdi','mmi','magType','type','code',])
+    
+    return total, eventos
 
 
-def req_5(control):
+def req_5(control,profundidadmin,minestaciones):
     """
     Retorna el resultado del requerimiento 5
     """
-    # TODO: Modificar el requerimiento 5
-    pass
+    
+    total, eventos, keyeventss = model.req_5(control['model'], profundidadmin, minestaciones)
+    
+    eventos = model.primeroultimomapa(eventos, keyeventss, filter_data=['time','mag','lat','long','depth','sig','gap','nst','title','cdi','mmi','magType','type','code',])
+    
+    
+    return total, eventos
 
-def req_6(control):
+
+def req_6(control, aniorelevante, latreferencia, longreferencia, radioarea, neventos):
     """
     Retorna el resultado del requerimiento 6
     """
-    # TODO: Modificar el requerimiento 6
-    pass
+    eventoo, eventos, dates = model.req_6(
+        control['model'], aniorelevante, latreferencia, longreferencia, radioarea, neventos)
+    return model.primeroultimomapa(eventos, dates, filter_data=['time','mag','lat','long','depth','sig','gap','nst','title','cdi','mmi','magType','type','code']), model.get_filtered_data(eventoo, ['time','mag','lat','long','depth','sig','gap','nst','title','cdi','mmi','magType','type','code'])
 
 
 def req_7(control):

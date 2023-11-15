@@ -34,6 +34,7 @@ import traceback
 import sys
 default_limit = 1000
 sys.setrecursionlimit(default_limit*10)
+import datetime as dt
 
 """
 La vista se encarga de la interacción con el usuario
@@ -47,6 +48,7 @@ def new_controller():
     """
         Se crea una instancia del controlador
     """
+    return controller.new_controller()
     #TODO: Llamar la función del controlador donde se crean las estructuras de datos
     pass
 
@@ -65,49 +67,66 @@ def print_menu():
     print("0- Salir")
 
 
-def load_data(control, filename, memoriasino):
+def tabular(cosas, titulos='', len=0, col=[]):
+    """
+    Dependiendo si es lista o diccionario la función 
+    llamará a los métodos de tabulate para imprimir elements 
+    """
+
+    cols = []
+    
+    
+    if len > 0:
+        
+        cols = [8 for _ in range(len)]
+    if col:
+        cols = col
+    if type(cosas) is list:
+        print(tabulate(cosas, titulos=(titulos or 'keys'),
+              tablefmt='grid', maxcolwidths=cols or None))
+    if type(cosas) is dict:
+        print(tabulate([[i, j] for i, j in cosas.items()], headers=(
+            titulos or cosas.keys()), tablefmt="grid", maxcolwidths=cols or None))
+
+
+def Subtabla(diccionario):
+    
+    
+    return tabulate([diccionario.keys(), diccionario.values()], tablefmt='grid')
+
+
+def Subtabular(cosas):
+    respuesta = ""
+    
+    
+    for cosa in cosas:
+        
+        respuesta += Subtabla(cosa) + "\n"
+        
+    return respuesta
+
+def tablagrande(criterios, eventos):
+    
+    
+    return list(map(lambda event: {criterios: event[0][criterios] if len(event) > 0 else "",'events': len(event),'details': Subtabular(eventos)}, eventos))
+    
+def load_data(control):
     """
     Carga los datos
     """
     
-    datos = controller.load_data(control, filename, memoriasino)
+    datos = controller.load_data(control, "small")
+    
     return datos
-def tresprimerosultimos(lista ,sample=3):
 
-    cosas = lt.size(lista)
-    
-    listaprintear = lt.newList(datastructure="ARRAY_LIST")
-    
-    if cosas <= sample*2:
-        for terremoto in lt.iterator(lista):
-            lt.addLast(listaprintear, terremoto)
-    else:
-        i = 1
-        while i <= sample:
-            terremoto = lt.getElement(lista, i)
-            lt.addLast(listaprintear, terremoto)
-            i += 1
-            
-        i = cosas - sample + 1
-        while i <= cosas:
-            terremoto = lt.getElement(lista, i)
-            lt.addLast(listaprintear, terremoto)
-            i += 1
 
-    return listaprintear
-
-def print_data(control, id):
-    """
-        Función que imprime un dato dado su ID
-    """
-    #TODO: Realizar la función para imprimir un elemento
-    lista_terremotos = control["terremotos"]
-    listaprintear = tresprimerosultimos(lista_terremotos)
-    listamanipulable = lt.newList(datastructure= "ARRAY_LIST")
+def fechas(fechain, fechafi):
+    fechain = dt.datetime.strptime(fechain, "%Y-%m-%dT%H:%M")
     
-    printlist_manipulable = lt.iterator(printlist_manipulable)
-    print("3 primeras y últimos terremotos cargados")
-    print(tabulate(printlist_manipulable, headers="keys", tablefmt="simple_grid", maxcolwidths=15, maxheadercolwidths=15))
+    
+    fechafi = dt.datetime.strptime(fechafi, "%Y-%m-%dT%H:%M")
+
+    return fechain, fechafi
 
 
 
@@ -119,8 +138,17 @@ def print_req_1(control):
     print("="*10+" Req No. 1 Inputs " + "="*10 )
  
     anio_inicial = input('Ingrese la fecha inicial del intervalo o (en formato "%Y-%m-%dT%H:%M")\n->')
-    anio_final = (input('Ingrese la fecha final del intervalo o (en formato "%Y-%m-%dT%H:%M")\n->'))
-
+    anio_final= (input('Ingrese la fecha final del intervalo o (en formato "%Y-%m-%dT%H:%M")\n->'))
+    
+    
+    total, eventos = controller.req_1(control, anio_inicial, anio_final)
+    
+    print("El total de eventos encontrados fue de: ", total)
+    
+    eventoretorna = tablagrande('time', eventos)
+    
+    
+    tabular(eventoretorna)
 
 
 
@@ -133,7 +161,13 @@ def print_req_2(control):
 
     magnitudmin = int(input('Ingrese el límite inferior de la magnitud (float) \n->'))
     magnitudmax = input('Ingrese el límite superior de la magnitud (float) \n->')
-
+    
+    eventos = controller.req_2(control, magnitudmin, magnitudmax)
+    
+    
+    eventoretorna = tablagrande('mag', eventos)
+    
+    tabular(eventoretorna)
 
 def print_req_3(control):
     """
@@ -143,7 +177,18 @@ def print_req_3(control):
     print("="*10+" Requerimiento No. 3 Inputs-> José Gabriel Bernal Cárdenas jg.bernalc1@uniandes.edu.co, 202213421" + "="*10 )
     magnitudmin = input('Digite el mínimo de magnitud para revisar entre los eventos\n->')
     profundidadmax = input('Digite el máximo de magnitud para revisar entre los eventos \n->')
-
+    
+    
+    total, eventos = controller.req_3(control, magnitudmin, profundidadmax)
+    
+    print("El total de eventos encontrados fue de : ", total)
+    
+    eventoretorna = tablagrande('time', eventos)
+    
+    
+    tabular(eventoretorna)
+    
+    
     
 
 
@@ -155,6 +200,16 @@ def print_req_4(control):
     print("="*10+" Requerimiento No. 4 Inputs-> Juan Camilo Gómez Uribe j.gomezu@uniandes.edu.co, 202220238" + "="*10 )
     significanciamin = input('Digite el mínimo de significancia (sig) para revisar entre los eventos\n->')
     azitumalmax = input('Digite la máxima distancia azimutal (gap) para revisar entre los eventos \n->')
+    
+    
+    total, eventos = controller.req_4(control, significanciamin, azitumalmax)
+    
+    print("El total de eventos encontrados fue de : ", total)
+    
+    
+    eventoretorna = tablagrande('time', eventos)
+    
+    tabular(eventoretorna)
 
     
 
@@ -166,7 +221,11 @@ def print_req_5(control):
     print("="*10+" Requerimiento No. 5 Inputs-> Frank Yasser Ramírez Marín fy.ramirez@uniandes.edu.co, 202215747 " + "="*10 )
     profundidadmin = input('Digite el mínimo de profundidad (depth) para revisar entre los eventos\n->')
     minestaciones = input('Digite la cantidad mínima de esttaciones que detectan el evento (nst) para revisar entre los eventos \n->')
-
+    total, eventoss = controller.req_5(control, profundidadmin, minestaciones)
+    
+    print("Total de eventos encontrados: ", total)
+    eventoretorna = tablagrande('time', eventoss)
+    tabular(eventoretorna)
 
 
 def print_req_6(control):
@@ -180,7 +239,14 @@ def print_req_6(control):
     longreferencia = input('Digite la longitud de referencia para el área de eventos (long) \n->')
     radioarea = input('Digite el radio (km) del área circundante (float) \n->')
     neventos = input('Digite el número de N eventos de mágnitud más cercana a revisar \n->')
-
+    
+    eventos, eventoo = controller.req_6(control, aniorelevante, latreferencia, longreferencia, radioarea, neventos)
+    
+    eventoretorna = tablagrande('time', eventos)
+    
+    print(Subtabular(eventoo))
+    
+    tabular(eventoretorna)
 
 
 def print_req_7(control):
@@ -219,66 +285,10 @@ if __name__ == "__main__":
         print_menu()
         inputs = input('Seleccione una opción por favor \n')
         if int(inputs) == 1:
-            print("Cargando información de los archivos....\n")
-            control = new_controller()
-                
-            print("Quiere que se calcule la memoria que se use? \n-> ")
-            memoriasino = float(input("Sí\n->1 \n No\n->0 \n-> "))
-                
-            print("¿Que tamaño de archivo desea cargar? \n")
-            print("1. 5% de los datos")
-            print("2. 10% de los datos")
-            print("3. 20% de los datos")
-            print("4. 30% de los datos")
-            print("5. 50% de los datos")
-            print("6. 80% de los datos")
-            print("7. archivo Large (todos los datos)")
-            print("8. archivo Small (el más pequeño) \n")
-                
-            file_name = int(input("\n-> "))
+            print("Cargando información de los archivos ....\n")
+            data = load_data(control)
+                    
             
-            if file_name == 1:
-                
-                
-                    print("Cargando el 5% de los datos...")
-                    
-                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-5pct.csv', memoriasino)
-                    
-            elif file_name == 2:
-                    print("Cargando el 10%  de los datos...")
-                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-10pct.csv', memoriasino)
-                    
-            elif file_name == 3:
-                    print("Cargando el 20%  de los datos...")
-                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-20pct.csv', memoriasino)
-                    
-            elif file_name == 4:
-                    print("Cargando el 30%  de los datos...")
-                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-30pct.csv', memoriasino)
-
-            elif file_name == 5:
-                    print("Cargando el 50%  de los datos ...")
-                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-50pct.csv', memoriasino)
-                    
-            elif file_name == 6:
-                    print("Cargando el 80%  de los datos...")
-                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-80pct.csv', memoriasino)
-
-            elif file_name == 7:
-                    print("Cargando datos del archivo large...")
-                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-large.csv', memoriasino)
-                    
-            elif file_name == 8:
-                    print("Cargando datos del archivo small ...")
-                    resultado, tiempo, memoriaa = load_data(control, 'Data/earthquakes/temblores-utf8-small.csv', memoriasino)
-                    
-            print_data(resultado)
-                    
-            if int(memoriasino) == 1:
-                print("La memoria que se uso en esta carga de datos fue de \n-> ", str(memoriaa), "Kb")
-                
-                print("El tiempo que tardó esta ejecución fue: ", str(tiempo), "milisegundos") 
-                      
         elif int(inputs) == 2:
             print_req_1(control)
 

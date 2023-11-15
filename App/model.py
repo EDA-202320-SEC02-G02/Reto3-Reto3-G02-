@@ -48,176 +48,490 @@ dos listas, una para los videos, otra para las categorias de los mismos.
 
 # Construccion de modelos
 
-
-def new_data_structs():
+def newCatalog():
     """
     Inicializa las estructuras de datos del modelo. Las crea de
     manera vacía para posteriormente almacenar la información.
     """
-    data_structs = {"informacion": mp.newMap(1),
-                    "tiempo": om.newMap(),
-                    "año_mes": om.newMap(),
-                    "magnitud": om.newMap(),
-                    "profundidad":om.newMap()}
-    return data_structs
-
-
-# Funciones para agregar informacion al modelo
-
-def cargainfo(catalog:dict, filas:list, columnas:list, keys:list, actual: int):
+    # TODO: Inicializar las estructuras de datos
+    catalog = {"earthquackes": None,"date_tree": None,"significant": None,"magnitude": None,"depth": None,"years": None}
     
-    temblor = {} 
-    for i in range(len(columnas)):
-        temblor[keys[i]] = filas[columnas[i]]
-    
-    momento= dt.datetime.strptime('%Y-%m-%dT%H:%M',temblor['time'])
-    temblor['time'] = momento
-    
-    mp.put(catalog['informacion'], actual, temblor)
-    
-def add_data(data_structs, data):
-    """
-    Función para agregar nuevos elementos a la lista
-    """
-    #TODO: Crear la función para agregar elementos a una lista
-    lt.addLast(data_structs['temblores'], data)
-    fechas(data_structs['Fechas'], data)
-    
+    catalog["earthquackes"]=lt.newList("ARRAY_LIST", cmpfunction=comparafechas)
+    catalog["date_tree"]=om.newMap(omaptype="RBT", cmpfunction=comparafechas)
+    catalog["significant"]=om.newMap(omaptype="RBT")
+
+    catalog["magnitude"]=om.newMap(omaptype="RBT")
+    catalog["depth"]=om.newMap(omaptype="RBT")
+
+    catalog['years']=mp.newMap(101, maptype="PROBING", loadfactor=0.5)
+    return catalog
 
 
-def fechas(map, data):
-    fecha = data['time']
-    fechacorta = fecha[:19]
-    fechareal = fechacorta.replace("/", "-", 2)
-    fechatemblor = dt.datetime.strptime(fechareal, '%Y-%m-%d %H:%M:%S')
-    entrada = om.get(map, fechatemblor.date())
-    if entrada is None:
-        entradaa = nuevafecha(data)
-        om.put(map, fechatemblor.date(), entradaa)
-    else:
-        entradaa = me.getValue(entrada)
-    fechaa(entradaa, data)
-    return map
-# Funciones para creacion de datos
-def nuevafecha(data):
-    """
-    Crea una entrada en el indice por fechas, es decir en el arbol
-    binario.
-    """
-    entradaa = lt.newList('SINGLE_LINKED', comparacionfechas)
-    return entradaa
-
-def comparacionfechas(fecha1, fecha2):
+def comparafechas(fecha1, fecha2, reverse=False):
     """
     Compara dos fechas
     """
-    if (fecha1 == fecha2):
+    if (fecha1==fecha2):
         return 0
-    elif (fecha1 < fecha2):
-        return 1
-    else:
+    elif (fecha1<fecha2) and not reverse:
+        
         return -1
-def fechaa(datentry, data):
-    lst = datentry
-    lt.addLast(lst, data)
     
-def new_data(id, info):
+    else:
+        return 1
+    
+def add_earthquake(catalogo, terremoto):
     """
-    Crea una nueva estructura para modelar los datos
+    adicionar un terremoto al arbol
     """
-    #TODO: Crear la función para estructurar los datos
-    pass
+    terremoto['felt']="Unknown" if terremoto['felt']=='' else terremoto['felt']
+    terremoto['cdi']="Unknown" if terremoto['cdi']=='' else terremoto['cdi']
+    terremoto['mmi']="Unknown" if terremoto['mmi'] =='' else terremoto['mmi']
+    
+    
+    terremoto['tsunami']=False if terremoto['tsunami']== '0' else terremoto['tsunami']
+    terremoto['tsunami']= True if terremoto['tsunami']=='1' else terremoto['tsunami']
+    terremoto['gap']=0.000 if terremoto['gap']=='' else terremoto['gap']
+    terremoto['nst']=1 if terremoto['nst']=='' else terremoto['nst']
+    
+    lt.addLast(catalogo['earthquackes'], terremoto)
 
+    terremoto['mag']=float(terremoto['mag'])
+    
+    terremoto['depth']=float(terremoto['depth'])
+    
+    terremoto['sig']=float(terremoto['sig'])
+    
+    
+    terremoto['gap']=float(terremoto['gap'])
+    terremoto['lat']=float(terremoto['lat'])
+    
+    terremoto['long']=float(terremoto['long'])
 
+    terremoto['time']=dt.datetime.strptime(terremoto['time'], "%Y-%m-%dT%H:%M:%S.%fZ")
+
+    anio = terremoto['time'].year
+    # req 1 tree dates
+    actualizarr(catalogo["date_tree"],
+                         terremoto['time'], terremoto)
+    actualizarr(catalogo['significant'],
+                         terremoto['sig'], terremoto)
+    actualizarr(catalogo['depth'],
+                         terremoto['depth'], terremoto)
+    actualizarr(catalogo['magnitude'], terremoto['mag'], terremoto)
+    actualizar(catalogo['years'], anio, terremoto)
+
+    return catalogo
 # Funciones de consulta
 
-def get_data(data_structs, id):
-    """
-    Retorna un dato a partir de su ID
-    """
-    #TODO: Crear la función para obtener un dato de una lista
-    pass
+
+def actualizarr(mapa, llave, data):
+
+    entrada=om.get(mapa, llave)
+    if entrada is None:
+
+        datonuevo = lt.newList()
+        lt.addLast(datonuevo, data)
+        
+        
+        om.put(mapa, llave, datonuevo)
+    else:
+        fechaentry =me.getValue(entrada)
+        lt.addLast(fechaentry, data)
+
+    return mapa
+
+def actualizar(map, llave, data):
+
+    entrada=mp.get(map, llave)
+    
+    if entrada is None:
+        
+        
+        datonuevo= lt.newList()
+        
+        lt.addLast(datonuevo, data)
+        
+        
+        mp.put(map, llave, datonuevo)
+    else:
+        
+        fechaentry=me.getValue(entrada)
+        lt.addLast(fechaentry, data)
+    return map
 
 
-def data_size(data_structs):
+def primeroultimomapa(mapa, llaves, filter_data=None, size=3):
     """
-    Retorna el tamaño de la lista de datos
+    Retorna los n primeros y últimos elemento de la lista
     """
-    #TODO: Crear la función para obtener el tamaño de una lista
-    pass
+    primero= []
+    ultimo=[]
+    
+    if lt.size(llaves) < size * 2:
+        
+        for lave in lt.iterator(llaves):
+            
+            
+            elemento = primeroultimo(me.getValue(mp.get(map, lave)), filter_data, size)
+            primero.append(elemento)
+            
+            
+    else:
+        for i in range(1, size + 1):
+            
+            
+            primeroo= primeroultimo(me.getValue(mp.get(mapa, lt.getElement(llaves, i))), filter_data, size)
+            primero.append(primeroo)
+            
+            
+            ultimoo =primeroultimo(me.getValue(mp.get(mapa, lt.getElement(llaves, lt.size(llaves) - i + 1))), filter_data, size)
+            ultimo.insert(0, ultimoo)
+
+    return primero + ultimo
+
+def primeroultimo(data_structs, filter_data=None, size=3):
+    """
+    Retorna los n primeros y últimos elemento de la lista
+    """
+    primero =[]
+    
+    ultimo = []
+
+    if lt.size(data_structs) <size * 2:
+        
+        for i in range(1, lt.size(data_structs) + 1):
+            
+            elementoo = datosfiltrados(lt.getElement(data_structs, i), filter_data)
+            
+            primero.append(elementoo)
+    else:
+        
+        for i in range(1, size + 1):
+            
+            primeroo = datosfiltrados(lt.getElement(data_structs, i), filter_data)
+            
+            
+            primero.append(primeroo)
+           
+            ultimoo = datosfiltrados(lt.getElement(data_structs, lt.size(data_structs) - i + 1), filter_data)
+            ultimo.insert(0, ultimoo)
+
+    return primero + ultimo
+
+
+def datosfiltrados(data, atributos):
+    """
+    Retorna un diccionario con los atributos de un dato
+    """
+    if not atributos:
+        
+        return data
+
+    datosfiltrados ={}
+    
+    for lave in atributos:
+        
+        datosfiltrados[lave] =   data[lave]
+        
+    return datosfiltrados
 
 
 def req_1(data_structs, anio_inicial,anio_final):
     """
     Función que soluciona el requerimiento 1
     """
-    # TODO: Realizar el requerimiento 1
-    fechain = dt.datetime.strptime(anio_inicial, '%Y/%m/%d')
-    
-    fechafi = dt.datetime.strptime(anio_final, '%Y/%m/%d')
-    lst = om.values(data_structs['Fechas'], fechafi.date(), fechain.date())
-    
-    terremotos = 0
-    
-    listaterremotos = lt.newList(datastructure="ARRAY_LIST")
-    
-    for fechas in lt.iterator(lst):
-        #print(fechas)
-        
-        terremotos += lt.size(fechas)
-        
-        for temblor in lt.iterator(fechas):
-            #print(temblor)
-            lt.addLast(listaterremotos, temblor)
-            #print(listaterremotos)
-    return terremotos, listaterremotos
+    todos =mp.newMap()
+    arbolfecha=data_structs['date_tree']
 
+    fechain=dt.datetime.strptime(anio_inicial, "%Y-%m-%dT%H:%M")
+    
+    fechafi=dt.datetime.strptime(anio_final, "%Y-%m-%dT%H:%M")
+
+
+    eventosterre=om.keys(arbolfecha, fechain, fechafi)
+    
+    eventosterre=sort(eventosterre, composed_sort([comparaval]))
+    
+    
+    
+
+    for i in lt.iterator(eventosterre):
+        
+        eventos= om.get(arbolfecha, i)
+        
+        
+        eventoos= me.getValue(eventos)
+        
+        eventoss= lt.newList()
+        
+        
+        for j in lt.iterator(eventoos):
+            if j:
+                
+                
+                lt.addLast(eventoss, j)
+                
+        eventoss= sort(eventoss, composed_sort([comparamagnitud]))
+        
+        mp.put(todos,i,eventoss)
+        
+    total=lt.size(eventosterre)
+
+    return total, todos, eventoss
+
+def comparamagnitud(magnitud1,magnitud2):
+
+    if (magnitud1['mag']==magnitud2['mag']):
+        
+        return 0
+    
+    elif (magnitud1['mag']<magnitud2['mag']):
+        
+        return -1
+    else:
+        return 1
+    
+def comparaval(val1,val2):
+    
+    if (val1==val2) :
+        
+        return 0
+    
+    elif (val1<val2):
+        
+        
+        return -1
+    
+    else:
+        
+        return 1
+    
+def composed_sort(listacomp):
+    """
+    Función para comparar dos elementos por varios criterios
+    """
+    
+    
+    def cmp(dato1, dato2):
+        
+        for cmp_function in listacomp:
+            
+            resultado = cmp_function(dato1, dato2)
+            
+            if resultado != 0:
+                
+                
+                return resultado > 0
+            
+        return False
+    return cmp
 
 def req_2(data_structs, magnitudmin,magnitudmax):
     """
     Función que soluciona el requerimiento 2
     """
-    # TODO: Realizar el requerimiento 2
-    lst = om.values(data_structs['magnitud'], magnitudmin,magnitudmax)
+    todos=mp.newMap()
+    dato=data_structs["magnitude"]
     
-    terremotos = 0
+    valores=om.keys(dato, magnitudmin, magnitudmax)
     
-    listaterremotos = lt.newList(datastructure="ARRAY_LIST")
+    valores=sort(valores, composed_sort([comparaval]))
     
-    for fechas in lt.iterator(lst):
-        #print(fechas)
+    
+
+    for i in lt.iterator(valores):
+    
+        eventosentry=om.get(dato, i)
+        eventoos=me.getValue(eventosentry)
+
+        elememnto= lt.newList()
         
-        terremotos += lt.size(fechas)
-        
-        for temblor in lt.iterator(fechas):
-            #print(temblor)
-            lt.addLast(listaterremotos, temblor)
-            #print(listaterremotos)
-    return terremotos, listaterremotos
+        for j in lt.iterator(eventoos):
+            if j:
+                
+                lt.addLast(elememnto, j)
+                
+                
+        mp.put(todos,i,elememnto)
+    return todos,valores
 
 
-def req_3(data_structs):
+def req_3(data_structs,magnitudmin,profundidadmax):
     """
     Función que soluciona el requerimiento 3
     """
-    # TODO: Realizar el requerimiento 3
-    pass
+    
+    todos =mp.newMap()
+
+    arbolmagnitudes=data_structs["magnitude"]
+    
+    
+    maxmagnitud=om.maxKey(arbolmagnitudes)
+    
+    arbolfechas=data_structs['date_tree']
+
+    valoresllave=om.keys(arbolmagnitudes, magnitudmin, maxmagnitud)
+    
+    
+    total= lt.size(valoresllave)
+    
+    
+    fechaslave = lt.newList('ARRAY_LIST')
+    
+    for i in lt.iterator(valoresllave) :
+        eventosentry=om.get(arbolmagnitudes, i)
+        #print(i)
+        
+        eventoos=me.getValue(eventosentry)
+        
+        for j in lt.iterator(eventoos):
+            #print(j)
+            if j:
+                
+                if float(j['depth'])<=profundidadmax:
+                    
+                    
+                    lt.addLast(fechaslave,j['time'])
+
+    fechaslave= sort(fechaslave, composed_sort([comparaval]))
+    fechaslave=lt.subList(fechaslave, 1, 10)
+
+    for i in lt.iterator(fechaslave):
+        #print(i)
+        
+        
+        eventosentry=om.get(arbolfechas, i)
+        
+
+        eventoos=me.getValue(eventosentry)
+        elementoo= lt.newList()
+        
+        for j in lt.iterator(eventoos):
+            
+            if j:
+                
+                lt.addLast(elementoo, j)
+        mp.put(todos, i, elementoo)
+    return total, todos, fechaslave
 
 
-def req_4(data_structs):
+
+def req_4(data_structs,significanciamin,azitumalmax):
     """
     Función que soluciona el requerimiento 4
     """
-    # TODO: Realizar el requerimiento 4
-    pass
+    todos = mp.newMap()
+
+    
+    
+    arbolsig=data_structs["significant"]
+    
+    maxsig=om.maxKey(arbolsig)
+    arbolfechas=data_structs['date_tree']
+
+    valorllaves= om.keys(arbolsig, significanciamin, maxsig)
+    
+    
+    total = lt.size(valorllaves)
+    llavefecha = lt.newList('ARRAY_LIST')
+    for i in lt.iterator(valorllaves):
+        
+        
+        eventosentry=om.get(arbolsig, i)
+        eventoos=me.getValue(eventosentry)
+        
+        for j in lt.iterator(eventoos):
+            
+            if j:
+                
+                if float(j['gap'])<=azitumalmax:
+                    
+                    lt.addLast(llavefecha, j['time'])
+
+    llavefecha=sort(llavefecha, composed_sort([comparaval]))
+    
+    
+    llavefecha=lt.subList(llavefecha, 1, 15)
+
+    for i in lt.iterator(llavefecha):
+        #print(i)
+        elementp = lt.newList()
+        eventosentry=om.get(arbolfechas, i)
+        
+        
+        eventoos=me.getValue(eventosentry)
+        
+        for j in lt.iterator(eventoos):
+            
+            
+            if j:
+                
+                
+                lt.addLast(elementp, j)
+        mp.put(todos, i, elementp)
 
 
-def req_5(data_structs):
+    return total, todos, llavefecha
+
+
+
+def req_5(data_structs,profundidadmin, minestaciones):
     """
     Función que soluciona el requerimiento 5
     """
-    # TODO: Realizar el requerimiento 5
-    pass
+    todos= mp.newMap()
+    
+    
+    arbolfechas=data_structs['date_tree']
+    
+    arbolprofundidadess=data_structs["depth"]
+    llavefecha = lt.newList('ARRAY_LIST')
+    
+    profmax=om.maxKey(arbolprofundidadess)
+    
+
+    
+    valorllaves = om.keys(arbolprofundidadess,profundidadmin,profmax)
+    
+    
+    total = lt.size(valorllaves)
+    
+    for i in lt.iterator(valorllaves):
+        
+        eventosentry=om.get(arbolprofundidadess, i)
+        
+        
+        eventos=me.getValue(eventosentry)
+        
+        
+        for j in lt.iterator(eventos):
+            if j:
+                if float(j['nst'])>=minestaciones:
+                    lt.addLast(llavefecha, j['time'])
+
+
+    llavefecha=sort(llavefecha,composed_sort([comparaval]))
+    
+    
+    llavefecha=lt.subList(llavefecha, 1, 20)
+    for j in lt.iterator(llavefecha):
+        
+        
+        eventosentry= om.get(arbolfechas , j)
+
+        eventos =me.getValue(eventosentry)
+        elemento=lt.newList()
+        for i in lt.iterator(eventos):
+            if i:
+                
+                
+                lt.addLast(elemento , i)
+        mp.put(todos, j, elemento)
+
+    return total, todos, llavefecha
+
+
 
 
 def req_6(data_structs):
