@@ -24,7 +24,7 @@
  * Dario Correal - Version inicial
  """
 
-
+import math as mat
 import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import stack as st
@@ -161,7 +161,7 @@ def actualizar(map, llave, data):
     return map
 
 
-def primeroultimomapa(mapa, llaves, filter_data=None, size=3):
+def primeroultimomapa(map, llaves, filter_data=None, size=3):
     """
     Retorna los n primeros y últimos elemento de la lista
     """
@@ -181,11 +181,13 @@ def primeroultimomapa(mapa, llaves, filter_data=None, size=3):
         for i in range(1, size + 1):
             
             
-            primeroo= primeroultimo(me.getValue(mp.get(mapa, lt.getElement(llaves, i))), filter_data, size)
+            primeroo= primeroultimo(me.getValue(mp.get(
+                
+                map, lt.getElement(llaves, i))), filter_data, size)
             primero.append(primeroo)
             
             
-            ultimoo =primeroultimo(me.getValue(mp.get(mapa, lt.getElement(llaves, lt.size(llaves) - i + 1))), filter_data, size)
+            ultimoo =primeroultimo(me.getValue(mp.get(map, lt.getElement(llaves, lt.size(llaves) - i + 1))), filter_data, size)
             ultimo.insert(0, ultimoo)
 
     return primero + ultimo
@@ -541,12 +543,74 @@ def req_5(data_structs,profundidadmin, minestaciones):
 
 
 
-def req_6(data_structs):
-    """
-    Función que soluciona el requerimiento 6
-    """
-    # TODO: Realizar el requerimiento 6
-    pass
+def req_6(data_structs,aniorelevante,latreferencia,longreferencia ,radioarea, neventos):
+    eventoos = mp.newMap()
+    
+    significante=req6dos(data_structs,aniorelevante, latreferencia,longreferencia, radioarea)
+
+    efecha = data_structs['date_tree']
+    
+
+    for i in range(neventos):
+        cielo= om.ceiling(efecha, significante['time'])
+        piso=om.floor(efecha, significante['time'])
+        
+        
+        minimoo=min( cielo , piso )
+        
+        
+        eventosentry = om.get(efecha , minimoo)
+        
+        eventoo = me.getValue( eventosentry)
+        mp.remove(efecha, minimoo)
+
+
+
+        mp.put(eventoos,minimoo,eventoo)
+
+    eventosfecha=mp.keySet(eventoos)
+    eventosfecha=sort(eventosfecha, composed_sort([comparafechas]))
+
+    return significante,eventoos,eventosfecha
+
+
+def req6dos(data_structs,aniorelevante, latreferencia,longreferencia, radioarea):
+    listaa=lt.newList()
+    
+    anio=data_structs['years']
+    
+    en =mp.get(anio , aniorelevante)
+    
+    
+    eventoos =me.getValue(en)
+    
+    
+
+    for i in lt.iterator(eventoos) :
+        
+        if i:
+            
+            if radiofuncion(float(latreferencia), float(longreferencia), float(i['lat']), float(i['long']), radioarea):
+                
+                lt.addLast(listaa, i)
+
+    listaa = sort(listaa, composed_sort([comparasign]))
+
+    return lt.firstElement(listaa)
+
+def radiofuncion(latitud1, longitud1,latitud2, longitud2,radio) :
+    
+    latitud1= mat.radians(latitud1)
+    
+    
+    longitud1= mat.radians(longitud1)
+    
+    latitud2= mat.radians(latitud2)
+    
+    longitud2= mat.radians(longitud2)
+    
+
+    return 2 * mat.asin(mat.sqrt(mat.sin((latitud2 - latitud1) / 2) ** 2 + mat.cos(latitud1) * mat.sin(latitud2) * mat.cos((longitud2 - longitud1) / 2) ** 2)) * 6371 <= radio
 
 
 def req_7(data_structs):
@@ -576,6 +640,20 @@ def compare(data_1, data_2):
 
 # Funciones de ordenamiento
 
+def comparasign(signi1, signi2):
+    """
+    Compara dos significancias minim as
+    """
 
+    if (signi1['sig']==signi2['sig']):
+        
+        return 0
+    
+    elif (signi1['sig']> signi2['sig']):
+        return 1
+    
+    else:
+        
+        return -1
 
 
