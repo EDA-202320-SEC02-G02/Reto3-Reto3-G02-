@@ -82,7 +82,7 @@ def tabular(cosas, titulos='', len=0, col=[]):
     if col:
         cols = col
     if type(cosas) is list:
-        print(tabulate(cosas, titulos=(titulos or 'keys'),
+        print(tabulate(cosas, headers=(titulos or 'keys'),
               tablefmt='grid', maxcolwidths=cols or None))
     if type(cosas) is dict:
         print(tabulate([[i, j] for i, j in cosas.items()], headers=(
@@ -117,7 +117,7 @@ def load_data(control):
     
     datos = controller.load_data(control, "small")
     
-    return datos
+    tabular(datos)
 
 
 def fechas(fechain, fechafi):
